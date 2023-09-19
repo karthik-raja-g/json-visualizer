@@ -42,15 +42,16 @@ function getPrimitives(obj) {
   }
 
   export function generateNodesAndEdges(obj, parent, nodes = [], edges = []) {
-    console.log({ parent });
+    // console.log({ parent });
     const values = Object.values(obj);
     const hasNoChildren = values.every((value) => {
       return typeof value !== "object" || value === null;
     });
-    const parentId = parent ? `${parent}-child` : "root";
+    // console.log({obj, hasNoChildren})
+    const currentId = parent ? `${parent}-child` : "root";
     if (hasNoChildren) {
       const rootNode = {
-        id: parentId,
+        id: currentId,
         data: { ...obj },
         type: "customNode",
       };
@@ -61,41 +62,65 @@ function getPrimitives(obj) {
       }
       const edge = {
         source: parent,
-        target: parentId,
+        target: currentId,
         type: "smoothstep",
-        id:`${parent}->${parentId}`
+        // id: `${Math.random()}-x`
+        id:`${parent}->${currentId}`
       };
       edges.push(edge);
       return { nodes, edges };
     }
     const { values: currentValues, children: currentChildren } =
       getPrimitives(obj);
+    // console.log({obj})
+    // console.log({currentValues, currentChildren})
     const containerNode = {
-      id: parentId,
+      id: currentId,
       type: "customNode",
       data: {
         ...currentValues,
       },
     };
     nodes.push(containerNode);
+    // console.log({parent, currentId})
+    // const edge = {
+    //   source: parent,
+    //   target: currentId,
+    //   type: "smoothstep",
+    //   id: `${Math.random()}-x`
+    // }
+    // edges.push(edge);
     currentChildren.forEach((key) => {
-      const node = {
-        id: `${parentId}-${key}`,
+      const childObjRootNode = {
+        id: `${currentId}-${key}`,
         data: { title: key },
         type: "customNode",
       };
-      nodes.push(node);
+      nodes.push(childObjRootNode);
+      let parentToChildObjTitle = {}
+      if(parent) {
+        parentToChildObjTitle = {
+          target: `${currentId}-${key}`,
+          source: parent,
+          type: 'smoothstep',
+          id: `${parent}->${currentId}-${key}`
+          // id: `${Math.random()}-x`
+        }
+        edges.push(parentToChildObjTitle)
+      }
       const edgeSource = parent || "root";
-      const edgeTarget = parent ? parentId : `${parentId}-${key}`
-      const edgeId = parent ? `${parent}->${parentId}` : `root->${parentId}-${key}`
-      const parentToContainerEdge = {
+      const edgeTarget = parent ? currentId : `${currentId}-${key}`
+      // const edgeId = parent ? `${parent}->${currentId}` : `root->${currentId}-${key}`
+      const parentToPrimitiveChildren = {
         type: "smoothstep",
         source: edgeSource,
         target: edgeTarget,
-        id: edgeId
+        id: `${edgeSource}->${edgeTarget}`
+        // id: `${Math.random()}-x`
       };
-      edges.push(parentToContainerEdge);
-      generateNodesAndEdges(obj[key], `${parentId}-${key}`, nodes, edges);
+      console.log({ parentToChildObjTitle, parentToPrimitiveChildren})
+      edges.push(parentToPrimitiveChildren);
+      generateNodesAndEdges(obj[key], `${currentId}-${key}`, nodes, edges);
     });
     return { nodes, edges };
   }

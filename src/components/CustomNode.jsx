@@ -1,6 +1,5 @@
 import { Handle, Position } from "reactflow";
 import styled from "styled-components";
-// import { Node } from "./Node";
 
 const Node = styled.div`
   width: 250px;

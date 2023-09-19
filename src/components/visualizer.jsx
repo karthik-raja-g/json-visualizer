@@ -1,4 +1,9 @@
-import ReactFlow, { Background, Controls, useEdgesState, useNodesState } from "reactflow";
+import ReactFlow, {
+  Background,
+  Controls,
+  useEdgesState,
+  useNodesState,
+} from "reactflow";
 import CustomNode from "./CustomNode";
 import dagre from "dagre";
 import { useEffect, useMemo, useState } from "react";
@@ -36,46 +41,62 @@ const getLayoutedElements = (nodes, edges, direction = "TB") => {
   });
   return { nodes: nds, edges };
 };
-const initialData =  {
-  name: 'karthik',
+const initialData = {
+  name: "karthik",
   age: 25,
   isActive: true,
   nums: {
-    type: 'fooo',
+    type: "fooo",
     bar: 4,
     types: {
-      color: 'red',
-      uup: 5
-    }
+      color: "red",
+      uup: 5,
+    },
   },
   // prize: {
   //   apple: true,
   //   orange: false
   // },
   // exp: [1,5, { nest: 'true'}]
-}
-const {  nodes: dummyNodes,
-  edges: dummyEd} = generateNodesAndEdges(initialData,null,[],[])
-const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
-  dummyNodes,
-  dummyEd
+};
+const { nodes: dummyNodes, edges: dummyEd } = generateNodesAndEdges(
+  initialData,
+  null,
+  [],
+  []
 );
-export function Visualizer() {
-  const [nodes, setNodes, onNodesChange] = useNodesState(layoutedNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(layoutedEdges);
-  console.log({nodes, edges})
+// const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
+//   dummyNodes,
+//   dummyEd
+// );
+export function Visualizer({ nodes, edges }) {
+  const { nodes: layoutedNodes, edges: layoutedEdges } = useMemo(() => getLayoutedElements(
+    nodes,
+    edges
+  ),[nodes,edges])
+  // const [nodes, setNodes, onNodesChange] = useNodesState(layoutedNodes);
+  // const [edges, setEdges, onEdgesChange] = useEdgesState(layoutedEdges);
+  useEffect(() => {
+    console.log({ nodes, edges }, "change");
+  }, [nodes,edges]);
   return (
-    <ReactFlow
-      nodeTypes={customNodes}
-      edges={edges}
-      nodes={nodes}
-      // onNodesChange={onNodesChange}
-      // onEdgesChange={onEdgesChange}
-      // onConnect={onConnect}
-      fitView
-    >
-      <Background />
-      <Controls position="bottom-right" />
-    </ReactFlow>
+    <>
+      {layoutedNodes.length && layoutedEdges.length ? (
+        <ReactFlow
+          nodeTypes={customNodes}
+          nodes={layoutedNodes}
+          edges={layoutedEdges}
+          // onNodesChange={onNodesChange}
+          // onEdgesChange={onEdgesChange}
+          // onConnect={onConnect}
+          fitView
+        >
+          <Background />
+          <Controls position="bottom-right" />
+        </ReactFlow>
+      ) : (
+        <p>Loading...</p>
+      )}
+    </>
   );
 }
